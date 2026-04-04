@@ -12,16 +12,21 @@ Problem: Logging workouts requires tedious manual form-filling in apps.
 Solution: Just text the workout — the bot parses, saves, and tracks everything automatically.
 
 #Features
-Version 1 (Implemented)
- Manual workout input (exercise, weight, sets, reps)
- Workout history view
- Progress charts per exercise
-Version 2 (Planned)
- Natural language workout logging via LLM
- Automatic personal record detection
- Weekly training volume analytics
- Exercise catalog with muscle group filters
+Version 1 
+
+Manual workout input (exercise, weight,sets,reps)
+Workout history view
+Progress charts per exercise
+
+Version 2 
+
+Natural language workout logging via LLM
+Automatic personal record detection
+Weekly training volume analytics
+Exercise catalog with muscle group filters
+
 #Usage
+
 Open the app in your browser
 Add a workout (exercise + weight + sets + reps)
 Click “Get Stats” to see progress charts
