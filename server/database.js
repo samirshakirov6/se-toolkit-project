@@ -128,9 +128,11 @@ module.exports = {
 
   // Workout operations
   createWorkout: (userId, notes = '') => {
-    run('INSERT INTO workouts (user_id, notes) VALUES (?, ?)', [userId, notes]);
-    const result = get('SELECT last_insert_rowid() as id');
-    return { lastInsertRowid: result.id };
+    db.run('INSERT INTO workouts (user_id, notes) VALUES (?, ?)', [userId, notes]);
+    const result = db.exec('SELECT last_insert_rowid() as id');
+    const workoutId = result[0].values[0][0];
+    saveDb();
+    return { lastInsertRowid: workoutId };
   },
 
   getAllWorkouts: (userId) => {
