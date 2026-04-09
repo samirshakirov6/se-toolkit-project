@@ -31,6 +31,22 @@ router.post('/', authMiddleware, (req, res) => {
   try {
     const { notes, exercises } = req.body;
 
+    // Validate exercises
+    if (exercises && Array.isArray(exercises)) {
+      for (const ex of exercises) {
+        if (!Number.isInteger(ex.sets) || ex.sets < 1) {
+          return res.status(400).json({
+            error: `Invalid sets for "${ex.name}". Sets must be a natural number (positive integer).`
+          });
+        }
+        if (!Number.isInteger(ex.reps) || ex.reps < 1) {
+          return res.status(400).json({
+            error: `Invalid reps for "${ex.name}". Reps must be a natural number (positive integer).`
+          });
+        }
+      }
+    }
+
     const result = db.createWorkout(req.userId, notes);
     const workoutId = result.lastInsertRowid;
 

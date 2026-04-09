@@ -50,6 +50,24 @@ function WorkoutForm() {
       return;
     }
 
+    // Validate sets and reps are natural numbers
+    for (const ex of validExercises) {
+      const sets = parseInt(ex.sets);
+      const reps = parseInt(ex.reps);
+
+      if (!Number.isInteger(sets) || sets < 1) {
+        setError(`Sets for "${ex.name}" must be a natural number (1, 2, 3, ...)`);
+        setLoading(false);
+        return;
+      }
+
+      if (!Number.isInteger(reps) || reps < 1) {
+        setError(`Reps for "${ex.name}" must be a natural number (1, 2, 3, ...)`);
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       await api.post('/api/workouts', {
         notes,
@@ -64,7 +82,7 @@ function WorkoutForm() {
 
       navigate('/history');
     } catch (err) {
-      setError('Error saving workout. Please try again.');
+      setError(err.response?.data?.error || 'Error saving workout. Please try again.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -152,6 +170,7 @@ function WorkoutForm() {
                     onChange={(e) => updateExercise(index, 'sets', e.target.value)}
                     placeholder="3"
                     min="1"
+                    step="1"
                     required
                   />
                 </div>
@@ -165,6 +184,7 @@ function WorkoutForm() {
                     onChange={(e) => updateExercise(index, 'reps', e.target.value)}
                     placeholder="10"
                     min="1"
+                    step="1"
                     required
                   />
                 </div>
