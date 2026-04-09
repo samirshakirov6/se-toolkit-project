@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 
 function WorkoutHistory() {
   const [workouts, setWorkouts] = useState([]);
@@ -14,7 +14,7 @@ function WorkoutHistory() {
 
   const fetchWorkouts = async () => {
     try {
-      const response = await axios.get('/api/workouts');
+      const response = await api.get('/api/workouts');
       setWorkouts(response.data);
     } catch (error) {
       console.error('Error fetching workouts:', error);
@@ -33,7 +33,7 @@ function WorkoutHistory() {
 
     if (!exercises[workoutId]) {
       try {
-        const response = await axios.get(`/api/workouts/${workoutId}`);
+        const response = await api.get(`/api/workouts/${workoutId}`);
         setExercises(prev => ({
           ...prev,
           [workoutId]: response.data.exercises || []
@@ -50,7 +50,7 @@ function WorkoutHistory() {
     }
 
     try {
-      await axios.delete(`/api/workouts/${workoutId}`);
+      await api.delete(`/api/workouts/${workoutId}`);
       setWorkouts(workouts.filter(w => w.id !== workoutId));
     } catch (error) {
       console.error('Error deleting workout:', error);

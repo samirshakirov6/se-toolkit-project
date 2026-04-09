@@ -21,10 +21,20 @@ async function initDb() {
 
   // Create tables
   db.run(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL UNIQUE,
+      email TEXT NOT NULL UNIQUE,
+      password_hash TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE TABLE IF NOT EXISTS workouts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
       date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      notes TEXT
+      notes TEXT,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     );
 
     CREATE TABLE IF NOT EXISTS exercises (
@@ -38,6 +48,9 @@ async function initDb() {
       FOREIGN KEY (workout_id) REFERENCES workouts(id) ON DELETE CASCADE
     );
 
+    CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+    CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+    CREATE INDEX IF NOT EXISTS idx_workouts_user_id ON workouts(user_id);
     CREATE INDEX IF NOT EXISTS idx_exercises_workout_id ON exercises(workout_id);
     CREATE INDEX IF NOT EXISTS idx_exercises_name ON exercises(name);
     CREATE INDEX IF NOT EXISTS idx_workouts_date ON workouts(date);
@@ -90,33 +103,57 @@ module.exports = {
   initDb,
   getDbState: () => db ? 'Connected' : 'Not initialized',
 
+  // User operations
+  createUser: (username, email, passwordHash) => {
+    try {
+      run('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)',
+        [username, email, passwordHash]);
+      const user = get('SELECT id, username, email, created_at FROM users WHERE email = ?', [email]);
+      return user;
+    } catch (error) {
+      if (error.message.includes('UNIQUE constraint')) {
+        throw new Error('Username or email already exists');
+      }
+      throw error;
+    }
+  },
+
+  getUserByEmail: (email) => {
+    return get('SELECT * FROM users WHERE email = ?', [email]);
+  },
+
+  getUserById: (id) => {
+    return get('SELECT id, username, email, created_at FROM users WHERE id = ?', [id]);
+  },
+
   // Workout operations
-  createWorkout: (notes = '') => {
-    run('INSERT INTO workouts (notes) VALUES (?)', [notes]);
-    const result = get('SELECT last_insert_rowid() as id, changes() as lastInsertRowid');
+  createWorkout: (userId, notes = '') => {
+    run('INSERT INTO workouts (user_id, notes) VALUES (?, ?)', [userId, notes]);
+    const result = get('SELECT last_insert_rowid() as id');
     return { lastInsertRowid: result.id };
   },
 
-  getAllWorkouts: () => {
+  getAllWorkouts: (userId) => {
     return all(`
       SELECT w.*, COUNT(e.id) as exercise_count 
       FROM workouts w 
       LEFT JOIN exercises e ON w.id = e.workout_id 
+      WHERE w.user_id = ?
       GROUP BY w.id 
       ORDER BY w.date DESC
-    `);
+    `, [userId]);
   },
 
-  getWorkoutById: (id) => {
-    const workout = get('SELECT * FROM workouts WHERE id = ?', [id]);
+  getWorkoutById: (workoutId, userId) => {
+    const workout = get('SELECT * FROM workouts WHERE id = ? AND user_id = ?', [workoutId, userId]);
     if (!workout) return null;
 
-    workout.exercises = all('SELECT * FROM exercises WHERE workout_id = ?', [id]);
+    workout.exercises = all('SELECT * FROM exercises WHERE workout_id = ?', [workoutId]);
     return workout;
   },
 
-  deleteWorkout: (id) => {
-    run('DELETE FROM workouts WHERE id = ?', [id]);
+  deleteWorkout: (workoutId, userId) => {
+    run('DELETE FROM workouts WHERE id = ? AND user_id = ?', [workoutId, userId]);
   },
 
   // Exercise operations
@@ -132,40 +169,49 @@ module.exports = {
   },
 
   // Stats operations
-  getExerciseProgress: (exerciseName) => {
+  getExerciseProgress: (userId, exerciseName) => {
     return all(`
       SELECT e.*, w.date 
       FROM exercises e 
       JOIN workouts w ON e.workout_id = w.id 
-      WHERE e.name LIKE ? 
+      WHERE e.name LIKE ? AND w.user_id = ?
       ORDER BY w.date ASC
-    `, [`%${exerciseName}%`]);
+    `, [`%${exerciseName}%`, userId]);
   },
 
-  getUniqueExercises: () => {
-    return all('SELECT DISTINCT name, muscle_group FROM exercises ORDER BY name');
-  },
-
-  getPersonalRecords: () => {
+  getUniqueExercises: (userId) => {
     return all(`
-      SELECT name, muscle_group, MAX(weight) as max_weight, MAX(reps) as max_reps
-      FROM exercises
-      GROUP BY name
-    `);
+      SELECT DISTINCT e.name, e.muscle_group 
+      FROM exercises e 
+      JOIN workouts w ON e.workout_id = w.id 
+      WHERE w.user_id = ?
+      ORDER BY e.name
+    `, [userId]);
   },
 
-  getWeeklyVolume: () => {
+  getPersonalRecords: (userId) => {
     return all(`
-      SELECT 
-        strftime('%Y-%W', date) as week,
-        COUNT(*) as total_exercises,
-        SUM(sets * reps) as total_volume,
-        SUM(weight * sets * reps) as total_weight_volume
+      SELECT e.name, e.muscle_group, MAX(e.weight) as max_weight, MAX(e.reps) as max_reps
       FROM exercises e
       JOIN workouts w ON e.workout_id = w.id
+      WHERE w.user_id = ?
+      GROUP BY e.name
+    `, [userId]);
+  },
+
+  getWeeklyVolume: (userId) => {
+    return all(`
+      SELECT 
+        strftime('%Y-%W', w.date) as week,
+        COUNT(*) as total_exercises,
+        SUM(e.sets * e.reps) as total_volume,
+        SUM(e.weight * e.sets * e.reps) as total_weight_volume
+      FROM exercises e
+      JOIN workouts w ON e.workout_id = w.id
+      WHERE w.user_id = ?
       GROUP BY week
       ORDER BY week DESC
       LIMIT 12
-    `);
+    `, [userId]);
   }
 };

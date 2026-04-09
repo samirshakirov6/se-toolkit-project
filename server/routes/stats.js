@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../database');
+const { authMiddleware } = require('../middleware/auth');
 
 // Get exercise progress by name
-router.get('/progress/:exerciseName', (req, res) => {
+router.get('/progress/:exerciseName', authMiddleware, (req, res) => {
   try {
-    const progress = db.getExerciseProgress(req.params.exerciseName);
+    const progress = db.getExerciseProgress(req.userId, req.params.exerciseName);
     res.json(progress);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -13,9 +14,9 @@ router.get('/progress/:exerciseName', (req, res) => {
 });
 
 // Get all unique exercises
-router.get('/exercises', (req, res) => {
+router.get('/exercises', authMiddleware, (req, res) => {
   try {
-    const exercises = db.getUniqueExercises();
+    const exercises = db.getUniqueExercises(req.userId);
     res.json(exercises);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -23,9 +24,9 @@ router.get('/exercises', (req, res) => {
 });
 
 // Get personal records
-router.get('/personal-records', (req, res) => {
+router.get('/personal-records', authMiddleware, (req, res) => {
   try {
-    const records = db.getPersonalRecords();
+    const records = db.getPersonalRecords(req.userId);
     res.json(records);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -33,9 +34,9 @@ router.get('/personal-records', (req, res) => {
 });
 
 // Get weekly training volume
-router.get('/weekly-volume', (req, res) => {
+router.get('/weekly-volume', authMiddleware, (req, res) => {
   try {
-    const volume = db.getWeeklyVolume();
+    const volume = db.getWeeklyVolume(req.userId);
     res.json(volume);
   } catch (error) {
     res.status(500).json({ error: error.message });

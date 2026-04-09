@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 
 const EXERCISE_SUGGESTIONS = [
   'Bench Press', 'Squat', 'Deadlift', 'Overhead Press', 'Barbell Row',
@@ -43,7 +43,7 @@ function WorkoutForm() {
 
     // Validate exercises
     const validExercises = exercises.filter(ex => ex.name && ex.weight && ex.sets && ex.reps);
-    
+
     if (validExercises.length === 0) {
       setError('Please add at least one exercise with all fields filled');
       setLoading(false);
@@ -51,7 +51,7 @@ function WorkoutForm() {
     }
 
     try {
-      await axios.post('/api/workouts', {
+      await api.post('/api/workouts', {
         notes,
         exercises: validExercises.map(ex => ({
           name: ex.name,
@@ -92,7 +92,7 @@ function WorkoutForm() {
         </div>
 
         <h4 className="mt-4">Exercises</h4>
-        
+
         {exercises.map((exercise, index) => (
           <div key={index} className="card mb-3">
             <div className="card-body">

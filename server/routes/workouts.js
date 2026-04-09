@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../database');
+const { authMiddleware } = require('../middleware/auth');
 
 // Get all workouts
-router.get('/', (req, res) => {
+router.get('/', authMiddleware, (req, res) => {
   try {
-    const workouts = db.getAllWorkouts();
+    const workouts = db.getAllWorkouts(req.userId);
     res.json(workouts);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -13,9 +14,9 @@ router.get('/', (req, res) => {
 });
 
 // Get single workout with exercises
-router.get('/:id', (req, res) => {
+router.get('/:id', authMiddleware, (req, res) => {
   try {
-    const workout = db.getWorkoutById(req.params.id);
+    const workout = db.getWorkoutById(req.params.id, req.userId);
     if (!workout) {
       return res.status(404).json({ error: 'Workout not found' });
     }
@@ -26,13 +27,13 @@ router.get('/:id', (req, res) => {
 });
 
 // Create new workout
-router.post('/', (req, res) => {
+router.post('/', authMiddleware, (req, res) => {
   try {
     const { notes, exercises } = req.body;
-    
-    const result = db.createWorkout(notes);
+
+    const result = db.createWorkout(req.userId, notes);
     const workoutId = result.lastInsertRowid;
-    
+
     // Add exercises if provided
     if (exercises && Array.isArray(exercises)) {
       exercises.forEach(ex => {
@@ -46,8 +47,8 @@ router.post('/', (req, res) => {
         );
       });
     }
-    
-    const workout = db.getWorkoutById(workoutId);
+
+    const workout = db.getWorkoutById(workoutId, req.userId);
     res.status(201).json(workout);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -55,9 +56,9 @@ router.post('/', (req, res) => {
 });
 
 // Delete workout
-router.delete('/:id', (req, res) => {
+router.delete('/:id', authMiddleware, (req, res) => {
   try {
-    db.deleteWorkout(req.params.id);
+    db.deleteWorkout(req.params.id, req.userId);
     res.json({ message: 'Workout deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -65,7 +66,7 @@ router.delete('/:id', (req, res) => {
 });
 
 // Delete exercise
-router.delete('/exercise/:id', (req, res) => {
+router.delete('/exercise/:id', authMiddleware, (req, res) => {
   try {
     db.deleteExercise(req.params.id);
     res.json({ message: 'Exercise deleted successfully' });

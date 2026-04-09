@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 function Home() {
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+
   return (
     <div>
       <div className="p-5 mb-4 bg-light rounded-3">
@@ -9,6 +11,11 @@ function Home() {
           <h1 className="display-5 fw-bold">
             <i className="bi bi-activity text-primary"></i> Workout Tracker
           </h1>
+          {user.username && (
+            <p className="fs-5 text-success">
+              <i className="bi bi-person-check"></i> Welcome back, <strong>{user.username}</strong>!
+            </p>
+          )}
           <p className="col-md-8 fs-4">
             Track your workouts, monitor progress, and achieve your fitness goals.
           </p>

@@ -11,7 +11,7 @@ import {
   Legend
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
-import axios from 'axios';
+import api from '../api';
 
 ChartJS.register(
   CategoryScale,
@@ -40,7 +40,7 @@ function Progress() {
 
   const fetchExercises = async () => {
     try {
-      const response = await axios.get('/api/stats/exercises');
+      const response = await api.get('/api/stats/exercises');
       setExercises(response.data);
     } catch (error) {
       console.error('Error fetching exercises:', error);
@@ -49,7 +49,7 @@ function Progress() {
 
   const fetchPersonalRecords = async () => {
     try {
-      const response = await axios.get('/api/stats/personal-records');
+      const response = await api.get('/api/stats/personal-records');
       setPersonalRecords(response.data);
     } catch (error) {
       console.error('Error fetching personal records:', error);
@@ -58,7 +58,7 @@ function Progress() {
 
   const fetchWeeklyVolume = async () => {
     try {
-      const response = await axios.get('/api/stats/weekly-volume');
+      const response = await api.get('/api/stats/weekly-volume');
       setWeeklyVolume(response.data.reverse());
     } catch (error) {
       console.error('Error fetching weekly volume:', error);
@@ -73,7 +73,7 @@ function Progress() {
 
     setLoading(true);
     try {
-      const response = await axios.get(`/api/stats/progress/${exerciseName}`);
+      const response = await api.get(`/api/stats/progress/${exerciseName}`);
       setProgressData(response.data);
     } catch (error) {
       console.error('Error fetching progress:', error);
@@ -91,7 +91,7 @@ function Progress() {
   const progressChartData = () => {
     if (progressData.length === 0) return null;
 
-    const labels = progressData.map(p => 
+    const labels = progressData.map(p =>
       new Date(p.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     );
 

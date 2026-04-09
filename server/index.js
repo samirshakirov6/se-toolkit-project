@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const workoutRoutes = require('./routes/workouts');
 const statsRoutes = require('./routes/stats');
+const authRoutes = require('./routes/auth');
 const telegramBot = require('./bot');
 const db = require('./database');
 
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../client/build')));
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/workouts', workoutRoutes);
 app.use('/api/stats', statsRoutes);
 
