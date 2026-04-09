@@ -1,0 +1,33 @@
+{
+  "name": "se-toolkit-project",
+  "version": "1.0.0",
+  "description": "Workout Tracker - A web app and Telegram bot for logging workouts and tracking progress",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "nodemon server/index.js",
+    "client": "cd client && npm start",
+    "install-all": "npm install && cd client && npm install",
+    "build": "cd client && npm run build"
+  },
+  "keywords": [
+    "workout",
+    "tracker",
+    "telegram-bot",
+    "fitness"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "sql.js": "^1.10.2",
+    "node-telegram-bot-api": "^0.64.0",
+    "dotenv": "^16.4.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3",
+    "concurrently": "^8.2.2"
+  }
+}
