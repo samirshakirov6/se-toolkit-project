@@ -69,19 +69,6 @@ function Home() {
           </div>
         </div>
       </div>
-
-      <div className="mt-5 p-4 bg-light rounded">
-        <h3>
-          <i className="bi bi-robot"></i> Telegram Bot (Version 2)
-        </h3>
-        <p>
-          Use our Telegram bot to log workouts on the go! Just send a message like:
-        </p>
-        <code className="d-block p-3 bg-dark text-white rounded mb-3">
-          bench 70kg 3x10
-        </code>
-        <p>The bot will automatically parse and save your workout.</p>
-      </div>
     </div>
   );
 }

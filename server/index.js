@@ -4,7 +4,6 @@ const path = require('path');
 const workoutRoutes = require('./routes/workouts');
 const statsRoutes = require('./routes/stats');
 const authRoutes = require('./routes/auth');
-const telegramBot = require('./bot');
 const db = require('./database');
 
 const app = express();
@@ -36,9 +35,6 @@ db.initDb().then(() => {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     console.log(`Database initialized: ${db.getDbState()}`);
-
-    // Start Telegram bot
-    telegramBot();
   });
 }).catch(err => {
   console.error('Failed to initialize database:', err);

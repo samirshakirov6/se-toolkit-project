@@ -1,35 +1,30 @@
 # se-toolkit-project
 
 # Workout Tracker
-A web app and Telegram bot for logging workouts and tracking progress.
+A web app for logging workouts and tracking progress.
 
 ## Product Context
 **End users:** Gym-goers and home workout enthusiasts.
 
 **Problem:** Logging workouts requires tedious manual form-filling in apps.
 
-**Solution:** Just text the workout — the bot parses, saves, and tracks everything automatically.
+**Solution:** Simple and intuitive interface to log, save, and track everything automatically.
 
 ## Features
 
-### Version 1
 - ✅ Manual workout input (exercise, weight, sets, reps)
 - ✅ Workout history view
 - ✅ Progress charts per exercise
 - ✅ Personal records tracking
 - ✅ Weekly training volume analytics
-
-### Version 2
-- ✅ Natural language workout logging via LLM
-- ✅ Automatic personal record detection
-- ✅ Weekly training volume analytics
-- ✅ Exercise catalog with muscle group filters
+- ✅ User authentication (register/login)
+- ✅ User-specific workout data isolation
 
 ## Tech Stack
 - **Frontend:** React, Bootstrap, Chart.js
 - **Backend:** Node.js, Express
 - **Database:** SQLite (via sql.js)
-- **Telegram Bot:** node-telegram-bot-api
+- **Authentication:** JWT (jsonwebtoken) + bcrypt
 
 ## Installation
 
@@ -82,38 +77,18 @@ Open the app in your browser at `http://localhost:5000`
 
 ### How to Use the App
 
-1. Open the app in your browser
+1. Register a new account or login
 2. Add a workout (exercise + weight + sets + reps)
 3. Click "Get Stats" to see progress charts
-4. View workout history and calendar on the home page
-5. (Version 2) Text the bot "bench 70kg 3x10" — it logs everything automatically
-
-## Telegram Bot Setup
-
-1. Create a bot via [@BotFather](https://t.me/botfather) on Telegram
-2. Send `/newbot` and follow the instructions
-3. Copy the bot token
-4. Add it to your `.env` file:
-
-```env
-TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
-```
-
-### Bot Commands
-- `/start` - Show welcome message
-- `/history` - View recent workouts
-- `/records` - Personal records
-- `/volume` - Weekly training volume
-
-### Logging Workouts via Telegram
-Send messages in this format:
-```
-bench 70kg 3x10
-squat 100 4x8
-bench press 60kg 3x12, squat 80kg 4x10
-```
+4. View workout history on the History page
+5. Track your progress and personal records
 
 ## API Endpoints
+
+### Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login
+- `GET /api/auth/me` - Get current user info
 
 ### Workouts
 - `GET /api/workouts` - Get all workouts
@@ -140,8 +115,8 @@ se-toolkit-project/
 │   └── package.json
 ├── server/                # Backend
 │   ├── routes/           # API routes
+│   ├── middleware/       # Auth middleware
 │   ├── database.js       # Database setup
-│   ├── bot.js           # Telegram bot
 │   └── index.js         # Server entry
 ├── data/                 # SQLite database
 ├── .env                  # Environment variables
